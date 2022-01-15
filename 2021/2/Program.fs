@@ -34,15 +34,15 @@ let toCommand (line: string) =
 let input =
     System.IO.File.ReadLines "input.txt"
     |> Seq.choose toCommand
-    
-let (position, depth) =
+
+let (position, depth, _) =
     input
-    |> Seq.fold 
-        (fun (x, y) cmd ->
-            match cmd with 
-            | Up n -> (x, y - n)
-            | Down n -> (x, y + n)
-            | Forward n -> (x + n, y))
-        (0, 0)
+    |> Seq.fold
+        (fun (x, y, aim) cmd ->
+            match cmd with
+            | Up n -> (x, y, aim - n)
+            | Down n -> (x, y, aim + n)
+            | Forward n -> (x + n, y + aim * n, aim))
+        (0, 0, 0)
 
 printfn "%d" (position * depth)
