@@ -49,4 +49,45 @@ let firstPart input =
 
     gamma * epsilon
 
-printfn "%d" (firstPart input)
+let secondPart inputs =
+    let bias position inputs =
+        inputs
+        |> Seq.map (Seq.item position)
+        |> Seq.map (fun x -> if x = One then 1 else -1)
+        |> Seq.sum
+
+    let find inputs bitFromBias =
+        let rec find' position inputs =
+            let bias = bias position inputs
+            let digit = bitFromBias bias
+
+            let inputs' =
+                inputs
+                |> Seq.where (fun x -> (Seq.item position x) = digit)
+
+            if Seq.isEmpty inputs' then
+                Seq.empty
+            else
+                match Seq.tryExactlyOne inputs' with
+                | Some number -> number
+                | _ -> find' (position + 1) inputs'
+
+        find' 0 inputs
+
+    let (oxygenGenerator, co2Scrubber) =
+        ((fun bias ->
+            match bias with
+            | 0 -> One
+            | x when x > 0 -> One
+            | _ -> Zero),
+         (fun bias ->
+             match bias with
+             | 0 -> Zero
+             | x when x > 0 -> Zero
+             | _ -> One))
+        |> Pair.map (find inputs)
+        |> Pair.map toNumber
+
+    oxygenGenerator * co2Scrubber
+
+printfn "%d" (secondPart input)
