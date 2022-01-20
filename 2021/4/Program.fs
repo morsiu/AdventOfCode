@@ -104,6 +104,35 @@ let firstPart numbers boards =
     | Right _ -> 0
     | Left (Bingo.Score score) -> score
 
+let secondPart numbers boards =
+    let (_, score) =
+        numbers
+        |> Seq.fold
+            (fun (boards, score) number ->
+                let boards', score' =
+                    boards
+                    |> Seq.where (Bingo.hasBingo >> not)
+                    |> Seq.mapFold
+                        (fun score board ->
+                            let board' = Bingo.mark number board
+
+                            if Bingo.hasBingo board' then
+                                board', Some(Bingo.score number board')
+                            else
+                                board', score)
+                        None
+
+                match score' with
+                | Some _' -> boards', score'
+                | None -> boards', score)
+            (boards, None)
+
+    score
+    |> Option.map (fun x ->
+        match x with
+        | Bingo.Score y -> y)
+    |> Option.defaultValue 0
+
 let (numbers, boards) = input ()
 
 printfn "%d" (firstPart numbers boards)
