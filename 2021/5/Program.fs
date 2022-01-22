@@ -21,14 +21,10 @@ let input =
     |> Seq.choose toLine
     |> Seq.toArray
 
-let firstPart lines =
-    let lines' =
-        lines
-        |> Seq.where (fun (Line (x1, y1, x2, y2)) -> x1 = x2 || y1 = y2)
-
+let secondPart lines =
     let plane =
         let (xmax, ymax) =
-            lines'
+            lines
             |> Seq.fold
                 (fun (xmax, ymax) (Line (x1, y1, x2, y2)) ->
                     let xmax' = max xmax (max x1 x2)
@@ -38,17 +34,21 @@ let firstPart lines =
 
         Array2D.zeroCreate (xmax + 1) (ymax + 1)
 
-    lines'
+    lines
     |> Seq.fold
         (fun overlapCount (Line (x1, y1, x2, y2)) ->
             let points =
                 seq {
-                    let dx = if x1 < x2 then 1 else -1
-                    let dy = if y1 < y2 then 1 else -1
-
-                    for x in x1 .. dx .. x2 do
-                        for y in y1 .. dy .. y2 do
-                            x, y
+                    match (x2 - x1), (y2 - y1) with
+                    | 0, dy ->
+                        for y in y1 .. (sign dy) .. y2 do
+                            x1, y
+                    | dx, 0 ->
+                        for x in x1 .. (sign dx) .. x2 do
+                            x, y1
+                    | dx, dy ->
+                        for i in 0 .. abs (dx) do
+                            x1 + i * sign (dx), y1 + i * sign (dy)
                 }
 
             points
@@ -65,4 +65,11 @@ let firstPart lines =
                 overlapCount)
         0
 
-printfn "%d" (firstPart input)
+let firstPart lines =
+    let lines' =
+        lines
+        |> Seq.where (fun (Line (x1, y1, x2, y2)) -> x1 = x2 || y1 = y2)
+
+    secondPart lines'
+
+printfn "%d" (secondPart input)
